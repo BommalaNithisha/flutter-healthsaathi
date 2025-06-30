@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "439068515145",
+    "project_id": "healthsaathi-b09f9",
+    "storage_bucket": "healthsaathi-b09f9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:439068515145:android:45ce45e6a501b58a8a1898",
+        "android_client_info": {
+          "package_name": "com.example.healthsaathi"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-Myq0Fm7x5Sq2UiHXAw5oEemr3E4MLJo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
