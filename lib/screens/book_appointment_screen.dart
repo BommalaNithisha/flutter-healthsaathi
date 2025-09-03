@@ -77,7 +77,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Card(
-              elevation: 6,
+              elevation: 10,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
@@ -178,7 +178,7 @@ class _BookAppointmentScreenState extends State<BookAppointmentScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            backgroundColor: Colors.blueGrey,
+                            backgroundColor: Colors.lightBlue,
                           ),
                         ),
                       ),

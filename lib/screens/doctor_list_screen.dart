@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/doctor.dart';
-import '../services/firestore_service.dart';
+import '../services/firestore_service.dart'; //service to fetch doctors from Firestore
 import 'book_appointment_screen.dart';
 
 class DoctorListScreen extends StatelessWidget {
@@ -22,7 +22,7 @@ class DoctorListScreen extends StatelessWidget {
     };
     return emojiMap[specialization] ?? '👨‍⚕️';
   }
-
+ 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,8 +49,9 @@ class DoctorListScreen extends StatelessWidget {
                 if (snapshot.hasError) {
                   print('Firestore Error: ${snapshot.error}');
                   return Center(
-                      child: Text('error_loading_doctors'
-                          .trParams({'error': snapshot.error.toString()})));
+                      child: Text('error_loading_doctors'.trParams({
+                    'error': snapshot.error.toString()
+                  }))); //show actual error
                 }
                 if (!snapshot.hasData) {
                   return const Center(child: CircularProgressIndicator());

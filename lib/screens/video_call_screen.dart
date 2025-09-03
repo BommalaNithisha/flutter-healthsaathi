@@ -390,7 +390,7 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
   }
 }*/
 
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:get/get.dart';
@@ -559,6 +559,189 @@ class _VideoCallScreenState extends State<VideoCallScreen> {
               tooltip: 'end_call'.tr,
               onPressed: () async {
                 await _engine.leaveChannel();
+                setState(() {
+                  _joined = false;
+                  _remoteUid = null;
+                });
+                if (mounted) Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}*/
+
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:get/get.dart';
+
+const String appId = 'b7b8ab64a16a4dd2a6293c99ae164d8a';
+
+class VideoCallScreen extends StatefulWidget {
+  final String channelName;
+
+  const VideoCallScreen({super.key, required this.channelName});
+
+  @override
+  State<VideoCallScreen> createState() => _VideoCallScreenState();
+}
+
+class _VideoCallScreenState extends State<VideoCallScreen> {
+  RtcEngine? _engine; // Made nullable to avoid late error
+  int? _remoteUid;
+  bool _joined = false;
+  bool _muted = false;
+  bool _videoDisabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initAgora();
+  }
+
+  Future<void> _initAgora() async {
+    try {
+      // Request permissions
+      await [Permission.camera, Permission.microphone].request();
+
+      if (!await Permission.camera.isGranted ||
+          !await Permission.microphone.isGranted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('camera_and_microphone_required'.tr)),
+          );
+        }
+        return;
+      }
+
+      // Create and initialize
+      final engine = createAgoraRtcEngine();
+      await engine.initialize(const RtcEngineContext(appId: appId));
+      _engine = engine;
+
+      await _engine
+          ?.setChannelProfile(ChannelProfileType.channelProfileCommunication);
+      await _engine?.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+
+      _engine?.registerEventHandler(
+        RtcEngineEventHandler(
+          onJoinChannelSuccess: (connection, elapsed) {
+            print('Join channel success: ${connection.channelId}');
+            if (mounted) setState(() => _joined = true);
+          },
+          onUserJoined: (connection, uid, elapsed) {
+            print('Remote user joined: $uid');
+            if (mounted) setState(() => _remoteUid = uid);
+          },
+          onUserOffline: (connection, uid, reason) {
+            print('Remote user offline: $uid');
+            if (mounted) setState(() => _remoteUid = null);
+          },
+        ),
+      );
+
+      await _engine?.enableVideo();
+      await _engine?.startPreview();
+
+      await _engine?.joinChannel(
+        token: '',
+        channelId: widget.channelName,
+        uid: 0,
+        options: const ChannelMediaOptions(),
+      );
+    } catch (e) {
+      print('Error initializing Agora: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('error_initializing_agora'
+                  .trParams({'error': e.toString()}))),
+        );
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _engine?.leaveChannel();
+    _engine?.release();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('video_call'.tr)),
+      body: !_joined || _engine == null
+          ? const Center(child: CircularProgressIndicator())
+          : Stack(
+              children: [
+                // Remote view
+                _remoteUid != null
+                    ? AgoraVideoView(
+                        controller: VideoViewController.remote(
+                          rtcEngine: _engine!,
+                          canvas: VideoCanvas(uid: _remoteUid),
+                          connection:
+                              RtcConnection(channelId: widget.channelName),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          'waiting_for_user'.tr,
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                      ),
+
+                // Local view small window
+                Positioned(
+                  top: 20,
+                  left: 20,
+                  child: SizedBox(
+                    width: 120,
+                    height: 160,
+                    child: AgoraVideoView(
+                      controller: VideoViewController(
+                        rtcEngine: _engine!,
+                        canvas: const VideoCanvas(uid: 0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            IconButton(
+              icon: Icon(_muted ? Icons.mic_off : Icons.mic),
+              color: _muted ? Colors.red : Colors.green,
+              tooltip: _muted ? 'unmute'.tr : 'mute'.tr,
+              onPressed: () async {
+                await _engine?.muteLocalAudioStream(!_muted);
+                setState(() => _muted = !_muted);
+              },
+            ),
+            IconButton(
+              icon: Icon(_videoDisabled ? Icons.videocam_off : Icons.videocam),
+              color: _videoDisabled ? Colors.red : Colors.green,
+              tooltip: _videoDisabled ? 'enable_video'.tr : 'disable_video'.tr,
+              onPressed: () async {
+                await _engine?.muteLocalVideoStream(!_videoDisabled);
+                setState(() => _videoDisabled = !_videoDisabled);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.call_end),
+              color: Colors.red,
+              tooltip: 'end_call'.tr,
+              onPressed: () async {
+                await _engine?.leaveChannel();
                 setState(() {
                   _joined = false;
                   _remoteUid = null;

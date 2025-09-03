@@ -58,7 +58,7 @@ class _SignUpState extends State<SignUp> {
       // 4. Navigate to login page after delay
       await Future.delayed(Duration(seconds: 1));
       if (mounted) {
-        Navigator.pushReplacement(
+        Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => LoginPage()),
         );

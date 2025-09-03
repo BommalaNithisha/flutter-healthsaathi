@@ -1,9 +1,10 @@
-/*import 'dart:io';
+/*import 'dart:io';//main
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'login.dart';
 
@@ -117,7 +118,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        SnackBar(content: Text('Profile updated successfully'.tr)),
       );
     }
   }
@@ -130,7 +131,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text('My Profile'.tr),
         backgroundColor: Colors.teal,
         actions: [
           IconButton(
@@ -185,20 +186,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 20),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  prefixIcon: Icon(Icons.person),
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  labelText: 'Name'.tr,
+                  prefixIcon: const Icon(Icons.person),
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) =>
-                    value == null || value.isEmpty ? 'Enter name' : null,
+                    value == null || value.isEmpty ? 'Enter name'.tr : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailController,
                 readOnly: true,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
+                decoration: InputDecoration(
+                  labelText: 'Email'.tr,
                   prefixIcon: Icon(Icons.email),
                   border: OutlineInputBorder(),
                 ),
@@ -219,9 +220,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Enter phone number';
+                      return 'Enter phone number'.tr;
                     } else if (value.length != 10) {
-                      return 'Phone number must be 10 digits';
+                      return 'Phone number must be 10 digits'.tr;
                     }
                     return null;
                   }),
@@ -229,8 +230,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextFormField(
                 controller: _addressController,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
+                decoration: InputDecoration(
+                  labelText: 'Address'.tr,
                   prefixIcon: Icon(Icons.home),
                   border: OutlineInputBorder(),
                 ),
@@ -238,7 +239,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 icon: const Icon(Icons.save),
-                label: const Text('Save Changes'),
+                label: Text('Save Changes'.tr),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(
@@ -255,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }*/
-import 'dart:io';
+/*import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -514,7 +515,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-}
+}*/
 
 /*import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -806,3 +807,250 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }*/
+
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+import 'login.dart';
+
+class ProfileScreen extends StatefulWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+
+  String? _profileImageUrl;
+  File? _pickedImage;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    setState(() => _isLoading = true);
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final snapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        final data = snapshot.data();
+        _nameController.text = data?['name'] ?? '';
+        _emailController.text = data?['email'] ?? user.email ?? '';
+        _phoneController.text = data?['phone'] ?? '';
+        _addressController.text = data?['address'] ?? '';
+        setState(() => _profileImageUrl = data?['photoUrl']);
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error loading profile data: $e')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+
+    final file = File(picked.path);
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) return;
+
+    final ref = FirebaseStorage.instance.ref().child('profile_pics/$uid.jpg');
+    await ref.putFile(file);
+    final url = await ref.getDownloadURL();
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).set({
+      'photoUrl': url,
+    }, SetOptions(merge: true));
+
+    setState(() {
+      _pickedImage = file;
+      _profileImageUrl = url;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profile picture updated')),
+    );
+  }
+
+  Future<void> _saveProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && _formKey.currentState!.validate()) {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'name': _nameController.text.trim(),
+        'phone': _phoneController.text.trim(),
+        'address': _addressController.text.trim(),
+      }, SetOptions(merge: true));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Profile updated successfully'.tr)),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = _pickedImage != null
+        ? FileImage(_pickedImage!)
+        : (_profileImageUrl != null ? NetworkImage(_profileImageUrl!) : null);
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('My Profile'.tr),
+        backgroundColor: Colors.teal,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginPage()),
+                (route) => false,
+              );
+            },
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(20),
+              child: Form(
+                key: _formKey,
+                child: ListView(
+                  children: [
+                    const SizedBox(height: 20),
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 50,
+                            backgroundColor: Colors.teal.shade100,
+                            backgroundImage: image as ImageProvider<Object>?,
+                            child: image == null
+                                ? const Icon(Icons.person,
+                                    size: 50, color: Colors.white)
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 4,
+                            child: GestureDetector(
+                              onTap: _pickAndUploadImage,
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                                child:
+                                    const Icon(Icons.edit, color: Colors.teal),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        labelText: 'Name'.tr,
+                        prefixIcon: const Icon(Icons.person),
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) => value == null || value.isEmpty
+                          ? 'Enter name'.tr
+                          : null,
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _emailController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: 'Email'.tr,
+                        prefixIcon: const Icon(Icons.email),
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: const InputDecoration(
+                        labelText: 'Phone',
+                        prefixIcon: Icon(Icons.phone),
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(10),
+                      ],
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Enter phone number'.tr;
+                        } else if (value.length != 10) {
+                          return 'Phone number must be 10 digits'.tr;
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _addressController,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        labelText: 'Address'.tr,
+                        prefixIcon: const Icon(Icons.home),
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.save),
+                      label: Text('Save Changes'.tr),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      onPressed: _saveProfile,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+    );
+  }
+}

@@ -127,7 +127,7 @@ class _MyWidgetState extends State<LoginPage> {
                                     'Logged in: ${userCredential.user!.email}',
                                   );
 
-                                  Navigator.pushReplacement(
+                                  Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => const HomeScreen(),

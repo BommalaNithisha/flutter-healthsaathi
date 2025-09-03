@@ -31,8 +31,8 @@ class HealthSaathiApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.green),
 
-      translations: TranslationService(), // 🌐 Load translations
-      locale: TranslationService.locale, // 🌐 Initial locale
+      translations: TranslationService(), //  Load translations
+      locale: TranslationService.locale, //   Initial locale
       fallbackLocale: TranslationService.fallbackLocale,
 
       home: const SplashScreen(),

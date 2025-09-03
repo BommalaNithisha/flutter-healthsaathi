@@ -5,10 +5,11 @@ import 'package:get/get.dart';
 class EmergencyContactsScreen extends StatelessWidget {
   EmergencyContactsScreen({super.key});
 
+  // ✅ Only store the keys + numbers ONCE
   final List<Map<String, String>> contacts = [
-    {'name': 'ambulance'.tr, 'phone': '102'},
-    {'name': 'fire'.tr, 'phone': '101'},
-    {'name': 'police'.tr, 'phone': '100'},
+    {'name': 'ambulance', 'phone': '102'},
+    {'name': 'fire', 'phone': '101'},
+    {'name': 'police', 'phone': '100'},
   ];
 
   void _callNumber(String number) async {
@@ -22,12 +23,6 @@ class EmergencyContactsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> localizedContacts = [
-      {'name': 'ambulance'.tr, 'phone': '102'},
-      {'name': 'fire'.tr, 'phone': '101'},
-      {'name': 'police'.tr, 'phone': '100'},
-    ];
-
     return Scaffold(
       appBar: AppBar(
         title: Text('emergency_contacts'.tr),
@@ -35,9 +30,9 @@ class EmergencyContactsScreen extends StatelessWidget {
       ),
       body: ListView.builder(
         padding: const EdgeInsets.all(12),
-        itemCount: localizedContacts.length,
+        itemCount: contacts.length,
         itemBuilder: (context, i) {
-          final contact = localizedContacts[i];
+          final contact = contacts[i];
           return Card(
             elevation: 4,
             margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
@@ -51,7 +46,7 @@ class EmergencyContactsScreen extends StatelessWidget {
                 child: const Icon(Icons.local_phone, color: Colors.white),
               ),
               title: Text(
-                contact['name']!,
+                contact['name']!.tr,
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
