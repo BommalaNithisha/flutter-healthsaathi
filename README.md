@@ -1,16 +1,1 @@
-# healthsaathi
-
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![image alt]( https://github.com/BommalaNithisha/flutter-healthsaathi/blob/0771453d1a04fb49bf62f9c48b9070ca1c687482/githealthsaathi_images/Screenshot%202025-07-01%20162847.png )
